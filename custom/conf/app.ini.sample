@@ -440,6 +440,19 @@ SHOW_REGISTRATION_BUTTON = true
 ; When adding a repo to a team or creating a new repo all team members will watch the
 ; repo automatically if enabled
 AUTO_WATCH_NEW_REPOS = true
+; Enable SPNEGO authentication via the built-in SSPI module in Windows.
+; To use SSPI authentication you need to create suitable service principal name (SPN)
+; for the user running gitea (see https://github.com/quasoft/websspi for more details)
+ENABLE_SSPI = false
+; Allow SSPI auth method to automatically create new users on the go
+SSPI_AUTO_CREATE_USERS = true
+; Allow SSPI auth method to automatically activate new users
+SSPI_AUTO_ACTIVATE_USERS = true
+; The character to use to replace the separators of down-level logon names (eg. the \
+; in "DOMAIN\user") and user principal names (eg. the @ in "user@example.org")
+SSPI_SEPARATOR_REPLACEMENT = _
+; Default language for users automatically created by SSPI auth method
+SSPI_DEFAULT_LANG = en-us
 
 [webhook]
 ; Hook task queue length, increase if webhook shooting starts hanging

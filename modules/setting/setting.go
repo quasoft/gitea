@@ -141,6 +141,7 @@ var (
 	LogInRememberDays     int
 	CookieUserName        string
 	CookieRememberName    string
+	CookieSuppressSSO     string
 	ReverseProxyAuthUser  string
 	ReverseProxyAuthEmail string
 	MinPasswordLength     int
@@ -764,6 +765,7 @@ func NewContext() {
 	LogInRememberDays = sec.Key("LOGIN_REMEMBER_DAYS").MustInt(7)
 	CookieUserName = sec.Key("COOKIE_USERNAME").MustString("gitea_awesome")
 	CookieRememberName = sec.Key("COOKIE_REMEMBER_NAME").MustString("gitea_incredible")
+	CookieSuppressSSO = sec.Key("COOKIE_SUPPRESS_SSO").MustString("gitea_suppress_sso")
 	ReverseProxyAuthUser = sec.Key("REVERSE_PROXY_AUTHENTICATION_USER").MustString("X-WEBAUTH-USER")
 	ReverseProxyAuthEmail = sec.Key("REVERSE_PROXY_AUTHENTICATION_EMAIL").MustString("X-WEBAUTH-EMAIL")
 	MinPasswordLength = sec.Key("MIN_PASSWORD_LENGTH").MustInt(6)

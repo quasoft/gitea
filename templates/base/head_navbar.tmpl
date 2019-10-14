@@ -107,6 +107,20 @@
 						</a>
 					{{end}}
 
+					{{if .EnableSSPI}}
+						<div class="divider"></div>
+						{{if eq .SuppressSSO "1"}}
+							<a class="item" href="{{AppSubUrl}}/user/login?enable_sso=1">
+								<i class="octicon octicon-check"></i>
+								{{.i18n.Tr "enable_sso"}}<!-- Enable Single Sign-On -->
+							</a>
+						{{else}}
+							<a class="item" href="{{AppSubUrl}}/user/logout?disable_sso=1">
+								<i class="octicon octicon-circle-slash"></i>
+								{{.i18n.Tr "disable_sso"}}<!-- Disable Single Sign-On -->
+							</a>
+						{{end}}
+					{{end}}
 					<div class="divider"></div>
 					<a class="item" href="{{AppSubUrl}}/user/logout">
 						<i class="octicon octicon-sign-out"></i>
@@ -128,6 +142,24 @@
 			<a class="item{{if .PageIsSignIn}} active{{end}}" href="{{AppSubUrl}}/user/login?redirect_to={{.Link}}">
 				<i class="octicon octicon-sign-in"></i> {{.i18n.Tr "sign_in"}}
 			</a>
+			{{if .EnableSSPI}}
+				<div class="ui dropdown jump item poping up" data-content="{{.i18n.Tr "single_sign_on"}}" data-variation="tiny inverted">
+					<span class="text">
+						<i class="fitted octicon octicon-triangle-down not-mobile"></i>
+					</span>
+					<div class="menu">
+						{{if eq .SuppressSSO "1"}}
+							<a class="item" href="{{AppSubUrl}}/user/login?enable_sso=1">
+								<i class="octicon octicon-check"></i> {{.i18n.Tr "enable_sso"}}
+							</a>
+						{{else}}
+							<a class="item" href="{{AppSubUrl}}/user/logout?disable_sso=1">
+								<i class="octicon octicon-circle-slash"></i> {{.i18n.Tr "disable_sso"}}
+							</a>
+						{{end}}
+					</div><!-- end content sign-in menu -->
+				</div><!-- end dropdown sign-in -->
+			{{end}}
 		</div><!-- end anonymous right menu -->
 
 	{{end}}

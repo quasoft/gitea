@@ -155,6 +155,16 @@
 				<dd><i class="fa fa{{if .Service.EnableOpenIDSignUp}}-check{{end}}-square-o"></i></dd>
 				<dt>{{.i18n.Tr "admin.config.enable_openid_signin"}}</dt>
 				<dd><i class="fa fa{{if .Service.EnableOpenIDSignIn}}-check{{end}}-square-o"></i></dd>
+				<dt>{{.i18n.Tr "admin.config.enable_sspi"}}</dt>
+				<dd><i class="fa fa{{if .Service.EnableSSPI}}-check{{end}}-square-o"></i></dd>
+				<dt>{{.i18n.Tr "admin.config.sspi_auto_create_users"}}</dt>
+				<dd><i class="fa fa{{if .Service.SSPIAutoCreateUsers}}-check{{end}}-square-o"></i></dd>
+				<dt>{{.i18n.Tr "admin.config.sspi_auto_activate_users"}}</dt>
+				<dd><i class="fa fa{{if .Service.SSPIAutoActivateUsers}}-check{{end}}-square-o"></i></dd>
+				<dt>{{.i18n.Tr "admin.config.sspi_separator_replacement"}}</dt>
+				<dd>{{.Service.SSPISeparatorReplacement}}</dd>
+				<dt>{{.i18n.Tr "admin.config.sspi_default_lang"}}</dt>
+				<dd>{{.Service.SSPIDefaultLang}}</dd>
 				<dt>{{.i18n.Tr "admin.config.require_sign_in_view"}}</dt>
 				<dd><i class="fa fa{{if .Service.RequireSignInView}}-check{{end}}-square-o"></i></dd>
 				<dt>{{.i18n.Tr "admin.config.mail_notify"}}</dt>

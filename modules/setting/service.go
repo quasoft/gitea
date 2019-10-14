@@ -43,6 +43,11 @@ var Service struct {
 	EnableUserHeatmap                       bool
 	AutoWatchNewRepos                       bool
 	DefaultOrgMemberVisible                 bool
+	EnableSSPI                              bool
+	SSPIAutoCreateUsers                     bool
+	SSPIAutoActivateUsers                   bool
+	SSPISeparatorReplacement                string
+	SSPIDefaultLang                         string
 
 	// OpenID settings
 	EnableOpenIDSignIn bool
@@ -84,6 +89,11 @@ func newService() {
 	Service.DefaultOrgVisibility = sec.Key("DEFAULT_ORG_VISIBILITY").In("public", structs.ExtractKeysFromMapString(structs.VisibilityModes))
 	Service.DefaultOrgVisibilityMode = structs.VisibilityModes[Service.DefaultOrgVisibility]
 	Service.DefaultOrgMemberVisible = sec.Key("DEFAULT_ORG_MEMBER_VISIBLE").MustBool()
+	Service.EnableSSPI = sec.Key("ENABLE_SSPI").MustBool(false)
+	Service.SSPIAutoCreateUsers = sec.Key("SSPI_AUTO_CREATE_USERS").MustBool(true)
+	Service.SSPIAutoActivateUsers = sec.Key("SSPI_AUTO_ACTIVATE_USERS").MustBool(true)
+	Service.SSPISeparatorReplacement = sec.Key("SSPI_SEPARATOR_REPLACEMENT").MustString("_")
+	Service.SSPIDefaultLang = sec.Key("SSPI_DEFAULT_LANG").MustString("en-us")
 
 	sec = Cfg.Section("openid")
 	Service.EnableOpenIDSignIn = sec.Key("ENABLE_OPENID_SIGNIN").MustBool(!InstallLock)

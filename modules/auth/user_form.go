@@ -48,6 +48,7 @@ type InstallForm struct {
 	EnableFederatedAvatar          bool
 	EnableOpenIDSignIn             bool
 	EnableOpenIDSignUp             bool
+	EnableSSPI                     bool
 	DisableRegistration            bool
 	AllowOnlyExternalRegistration  bool
 	EnableCaptcha                  bool

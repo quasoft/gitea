@@ -253,6 +253,11 @@ Values containing `#` or `;` must be quoted using `` ` `` or `"""`.
 - `AUTO_WATCH_NEW_REPOS`: **true**: Enable this to let all organisation users watch new repos when they are created
 - `DEFAULT_ORG_VISIBILITY`: **public**: Set default visibility mode for organisations, either "public", "limited" or "private".
 - `DEFAULT_ORG_MEMBER_VISIBLE`: **false** True will make the membership of the users visible when added to the organisation.
+- `ENABLE_SSPI`: **false**: Allow authentication via SSPI implementation of SPNEGO (Windows only. To use SSPI authentication you need to create suitable service principal name (SPN) for the user running gitea (see https://github.com/quasoft/websspi for more details).
+- `SSPI_AUTO_CREATE_USERS`: **true**: Allow SSPI auth method to automatically create new users on the go.
+- `SSPI_AUTO_ACTIVATE_USERS`: **true**: Allow SSPI auth method to automatically activate new users.
+- `SSPI_SEPARATOR_REPLACEMENT`: **_**: The character to use to replace the separators of down-level logon names (eg. the \ in "DOMAIN\user") and user principal names (eg. the @ in "user@example.org").
+- `SSPI_DEFAULT_LANG`: **en-us**: Default language for users automatically created by SSPI auth method.
 
 ## Webhook (`webhook`)
 
