@@ -9,6 +9,7 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"gitea.com/macaron/macaron"
+	"gitea.com/macaron/session"
 )
 
 // Basic implements the SingleSignOn interface and authenticates requests (API requests
@@ -33,11 +34,17 @@ func (b *Basic) IsEnabled() bool {
 	return true
 }
 
+// Priority determines the order in which authentication methods are executed.
+// The lower the priority, the sooner the plugin is executed.
+func (b *Basic) Priority() int {
+	return 40000
+}
+
 // VerifyAuthData extracts and validates Basic data (username and password/token) from the
 // "Authorization" header of the request and returns the corresponding user object for that
 // name/token on successful validation.
 // Returns nil if header is empty or validation fails.
-func (b *Basic) VerifyAuthData(ctx *macaron.Context) *models.User {
+func (b *Basic) VerifyAuthData(ctx *macaron.Context, sess session.Store) *models.User {
 	baHead := ctx.Req.Header.Get("Authorization")
 	if len(baHead) == 0 {
 		return nil

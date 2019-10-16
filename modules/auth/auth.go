@@ -37,29 +37,6 @@ func IsAttachmentDownload(ctx *macaron.Context) bool {
 	return strings.HasPrefix(ctx.Req.URL.Path, "/attachments/") && ctx.Req.Method == "GET"
 }
 
-// SessionUser returns the user object corresponding to the "uid" session variable.
-func SessionUser(sess session.Store) *models.User {
-	// Get user ID
-	uid := sess.Get("uid")
-	if uid == nil {
-		return nil
-	}
-	id, ok := uid.(int64)
-	if !ok {
-		return nil
-	}
-
-	// Get user object
-	user, err := models.GetUserByID(id)
-	if err != nil {
-		if !models.IsErrUserNotExist(err) {
-			log.Error("GetUserById: %v", err)
-		}
-		return nil
-	}
-	return user
-}
-
 func handleSignIn(ctx *macaron.Context, sess session.Store, user *models.User) {
 	_ = sess.Delete("openid_verified_uri")
 	_ = sess.Delete("openid_signin_remember")
@@ -105,13 +82,6 @@ func SignedInUser(ctx *macaron.Context, sess session.Store) (*models.User, bool)
 	// to sign in the user
 	sso.UpdateSuppress(ctx)
 
-	// If the session already contains the uid of the signed user, return
-	// the corresponding user object
-	user := SessionUser(sess)
-	if user != nil {
-		return user, false
-	}
-
 	// If user has requested to temporary suppress single sign-on verification,
 	// skip all SSO plugins
 	if sso.Suppressed(ctx) == "1" {
@@ -119,11 +89,11 @@ func SignedInUser(ctx *macaron.Context, sess session.Store) (*models.User, bool)
 	}
 
 	// Try to sign in with each of the enabled plugins
-	for _, ssoMethod := range sso.Methods() {
+	for _, ssoMethod := range sso.MethodsByPriority() {
 		if !ssoMethod.IsEnabled() {
 			continue
 		}
-		user = ssoMethod.VerifyAuthData(ctx)
+		user := ssoMethod.VerifyAuthData(ctx, sess)
 		if user != nil {
 			// Make sure requests to API paths and PWA resources do not create a new session
 			if !IsAPIPath(ctx.Req.URL.Path) && !IsPWAResource(ctx.Req.URL.Path) {

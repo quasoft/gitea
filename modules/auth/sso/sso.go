@@ -2,10 +2,14 @@ package sso
 
 import (
 	"reflect"
+	"sort"
 
+	"code.gitea.io/gitea/models"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
+
 	"gitea.com/macaron/macaron"
+	"gitea.com/macaron/session"
 )
 
 var (
@@ -15,6 +19,14 @@ var (
 // Methods returns the instances of all registered SSO methods
 func Methods() []SingleSignOn {
 	return ssoMethods
+}
+
+func MethodsByPriority() []SingleSignOn {
+	methods := Methods()
+	sort.Slice(methods, func(i, j int) bool {
+		return methods[i].Priority() < methods[j].Priority()
+	})
+	return methods
 }
 
 // Register adds the specified instance to the list of available SSO methods
@@ -48,6 +60,29 @@ func Free() {
 			log.Error("Could not free '%s' SSO method, error: %s", reflect.TypeOf(method).String(), err)
 		}
 	}
+}
+
+// SessionUser returns the user object corresponding to the "uid" session variable.
+func SessionUser(sess session.Store) *models.User {
+	// Get user ID
+	uid := sess.Get("uid")
+	if uid == nil {
+		return nil
+	}
+	id, ok := uid.(int64)
+	if !ok {
+		return nil
+	}
+
+	// Get user object
+	user, err := models.GetUserByID(id)
+	if err != nil {
+		if !models.IsErrUserNotExist(err) {
+			log.Error("GetUserById: %v", err)
+		}
+		return nil
+	}
+	return user
 }
 
 // UpdateSuppress checks if the user has requests to temporary deactivate SSO authentication

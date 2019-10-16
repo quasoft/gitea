@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"gitea.com/macaron/macaron"
+	"gitea.com/macaron/session"
 	"github.com/quasoft/websspi"
 	gouuid "github.com/satori/go.uuid"
 )
@@ -46,11 +47,20 @@ func (s *SSPI) IsEnabled() bool {
 	return setting.Service.EnableSSPI
 }
 
+// Priority determines the order in which authentication methods are executed.
+// The lower the priority, the sooner the plugin is executed.
+// The SSPI plugin should be executed last as it returns 401 status code
+// if negotiation fails or should continue, which would prevent other
+// authentication methods to execute at all.
+func (s *SSPI) Priority() int {
+	return 50000
+}
+
 // VerifyAuthData uses SSPI (Windows implementation of SPNEGO) to authenticate the request.
 // If authentication is successful, returs the corresponding user object.
 // If negotiation should continue or authentication fails, immediately returns a 401 HTTP
 // response code, as required by the SPNEGO protocol.
-func (s *SSPI) VerifyAuthData(ctx *macaron.Context) *models.User {
+func (s *SSPI) VerifyAuthData(ctx *macaron.Context, sess session.Store) *models.User {
 	userInfo, outToken, err := sspiAuth.Authenticate(ctx.Req.Request, ctx.Resp)
 	if err != nil {
 		log.Warn("Authentication failed with error: %v\n", err)

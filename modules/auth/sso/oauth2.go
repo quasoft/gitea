@@ -9,6 +9,7 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"gitea.com/macaron/macaron"
+	"gitea.com/macaron/session"
 )
 
 // CheckOAuthAccessToken returns uid of user from oauth token
@@ -106,11 +107,20 @@ func (o *OAuth2) IsEnabled() bool {
 	return true
 }
 
+// Priority determines the order in which authentication methods are executed.
+// The lower the priority, the sooner the plugin is executed.
+// The OAuth2 plugin should be executed first as it must ignore the user id stored
+// in the session (if there is a user id stored in session other plugins might
+// return the user object for that id).
+func (o *OAuth2) Priority() int {
+	return 10000
+}
+
 // VerifyAuthData extracts the user ID from the OAuth token in the query parameters
 // or the "Authorization" header and returns the corresponding user object for that ID.
 // If verification is successful returns an existing user object.
 // Returns nil if verification fails.
-func (o *OAuth2) VerifyAuthData(ctx *macaron.Context) *models.User {
+func (o *OAuth2) VerifyAuthData(ctx *macaron.Context, sess session.Store) *models.User {
 	if !models.HasEngine {
 		return nil
 	}

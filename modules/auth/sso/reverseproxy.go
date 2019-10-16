@@ -8,6 +8,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"gitea.com/macaron/macaron"
+	"gitea.com/macaron/session"
 	gouuid "github.com/satori/go.uuid"
 )
 
@@ -43,6 +44,12 @@ func (r *ReverseProxy) IsEnabled() bool {
 	return setting.Service.EnableReverseProxyAuth
 }
 
+// Priority determines the order in which authentication methods are executed.
+// The lower the priority, the sooner the plugin is executed.
+func (r *ReverseProxy) Priority() int {
+	return 30000
+}
+
 // VerifyAuthData extracts the username from the "setting.ReverseProxyAuthUser" header
 // of the request and returns the corresponding user object for that name.
 // Verification of header data is not performed as it should have already been done by
@@ -50,7 +57,7 @@ func (r *ReverseProxy) IsEnabled() bool {
 // If a username is available in the "setting.ReverseProxyAuthUser" header an existing
 // user object is returned (populated with username or email found in header).
 // Returns nil if header is empty.
-func (r *ReverseProxy) VerifyAuthData(ctx *macaron.Context) *models.User {
+func (r *ReverseProxy) VerifyAuthData(ctx *macaron.Context, sess session.Store) *models.User {
 	username := r.getUserName(ctx)
 	if len(username) == 0 {
 		return nil
