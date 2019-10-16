@@ -21,6 +21,7 @@ func Methods() []SingleSignOn {
 	return ssoMethods
 }
 
+// MethodsByPriority returns the instances of all registered SSO methods, ordered by ascending priority
 func MethodsByPriority() []SingleSignOn {
 	methods := Methods()
 	sort.Slice(methods, func(i, j int) bool {
