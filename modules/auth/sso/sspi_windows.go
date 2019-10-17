@@ -61,6 +61,12 @@ func (s *SSPI) Priority() int {
 // If negotiation should continue or authentication fails, immediately returns a 401 HTTP
 // response code, as required by the SPNEGO protocol.
 func (s *SSPI) VerifyAuthData(ctx *macaron.Context, sess session.Store) *models.User {
+	// If user has requested to temporary suppress single sign-on verification,
+	// skip all SSO plugins
+	if Suppressed(ctx) == "1" {
+		return nil
+	}
+
 	userInfo, outToken, err := sspiAuth.Authenticate(ctx.Req.Request, ctx.Resp)
 	if err != nil {
 		log.Warn("Authentication failed with error: %v\n", err)

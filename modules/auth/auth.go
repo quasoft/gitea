@@ -40,12 +40,6 @@ func SignedInUser(ctx *macaron.Context, sess session.Store) (*models.User, bool)
 	// to sign in the user
 	sso.UpdateSuppress(ctx)
 
-	// If user has requested to temporary suppress single sign-on verification,
-	// skip all SSO plugins
-	if sso.Suppressed(ctx) == "1" {
-		return nil, false
-	}
-
 	// Try to sign in with each of the enabled plugins
 	for _, ssoMethod := range sso.MethodsByPriority() {
 		if !ssoMethod.IsEnabled() {
