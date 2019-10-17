@@ -94,6 +94,11 @@ func (s *SSPI) VerifyAuthData(ctx *macaron.Context, sess session.Store) *models.
 		return nil
 	}
 
+	// Make sure requests to API paths and PWA resources do not create a new session
+	if !isAPIPath(ctx.Req.URL.Path) && !isPWAResource(ctx.Req.URL.Path) {
+		handleSignIn(ctx, sess, user)
+	}
+
 	return user
 }
 

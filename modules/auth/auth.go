@@ -6,14 +6,11 @@
 package auth
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
 	"code.gitea.io/gitea/models"
 	"code.gitea.io/gitea/modules/auth/sso"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/validation"
 
 	"gitea.com/macaron/binding"
@@ -27,48 +24,9 @@ func IsAPIPath(url string) bool {
 	return strings.HasPrefix(url, "/api/")
 }
 
-// IsPWAResource checks if the url is the Web App Manifest file or the Service Worker script
-func IsPWAResource(url string) bool {
-	return url == "/manifest.json" || url == "/serviceworker.js"
-}
-
 // IsAttachmentDownload check if request is a file download (GET) with URL to an attachment
 func IsAttachmentDownload(ctx *macaron.Context) bool {
 	return strings.HasPrefix(ctx.Req.URL.Path, "/attachments/") && ctx.Req.Method == "GET"
-}
-
-func handleSignIn(ctx *macaron.Context, sess session.Store, user *models.User) {
-	_ = sess.Delete("openid_verified_uri")
-	_ = sess.Delete("openid_signin_remember")
-	_ = sess.Delete("openid_determined_email")
-	_ = sess.Delete("openid_determined_username")
-	_ = sess.Delete("twofaUid")
-	_ = sess.Delete("twofaRemember")
-	_ = sess.Delete("u2fChallenge")
-	_ = sess.Delete("linkAccount")
-	err := sess.Set("uid", user.ID)
-	if err != nil {
-		log.Error(fmt.Sprintf("Error setting session: %v", err))
-	}
-	err = sess.Set("uname", user.Name)
-	if err != nil {
-		log.Error(fmt.Sprintf("Error setting session: %v", err))
-	}
-
-	// Language setting of the user overwrites the one previously set
-	// If the user does not have a locale set, we save the current one.
-	if len(user.Language) == 0 {
-		user.Language = ctx.Locale.Language()
-		if err := models.UpdateUserCols(user, "language"); err != nil {
-			log.Error(fmt.Sprintf("Error updating user language [user: %d, locale: %s]", user.ID, user.Language))
-			return
-		}
-	}
-
-	ctx.SetCookie("lang", user.Language, nil, setting.AppSubURL, setting.SessionConfig.Domain, setting.SessionConfig.Secure, true)
-
-	// Clear whatever CSRF has right now, force to generate a new one
-	ctx.SetCookie(setting.CSRFCookieName, "", -1, setting.AppSubURL, setting.SessionConfig.Domain, setting.SessionConfig.Secure, true)
 }
 
 // SignedInUser returns the user object of signed user.
@@ -95,10 +53,6 @@ func SignedInUser(ctx *macaron.Context, sess session.Store) (*models.User, bool)
 		}
 		user := ssoMethod.VerifyAuthData(ctx, sess)
 		if user != nil {
-			// Make sure requests to API paths and PWA resources do not create a new session
-			if !IsAPIPath(ctx.Req.URL.Path) && !IsPWAResource(ctx.Req.URL.Path) {
-				handleSignIn(ctx, sess, user)
-			}
 			_, isBasic := ssoMethod.(*sso.Basic)
 			return user, isBasic
 		}

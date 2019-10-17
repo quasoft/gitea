@@ -52,11 +52,6 @@ func (o *OAuth2) Free() error {
 	return nil
 }
 
-// isAPIPath returns true if the specified URL is an API path
-func (o *OAuth2) isAPIPath(url string) bool {
-	return strings.HasPrefix(url, "/api/")
-}
-
 // userIDFromToken returns the user id corresponding to the OAuth token.
 func (o *OAuth2) userIDFromToken(ctx *macaron.Context) int64 {
 	// Check access token.
@@ -125,7 +120,7 @@ func (o *OAuth2) VerifyAuthData(ctx *macaron.Context, sess session.Store) *model
 		return nil
 	}
 
-	if !o.isAPIPath(ctx.Req.URL.Path) {
+	if !isAPIPath(ctx.Req.URL.Path) {
 		return nil
 	}
 

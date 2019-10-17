@@ -1,8 +1,10 @@
 package sso
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
+	"strings"
 
 	"code.gitea.io/gitea/models"
 	"code.gitea.io/gitea/modules/log"
@@ -112,4 +114,48 @@ func Suppressed(ctx *macaron.Context) string {
 	} else {
 		return ctx.GetCookie(setting.CookieSuppressSSO)
 	}
+}
+
+// isAPIPath returns true if the specified URL is an API path
+func isAPIPath(url string) bool {
+	return strings.HasPrefix(url, "/api/")
+}
+
+// isPWAResource checks if the url is the Web App Manifest file or the Service Worker script
+func isPWAResource(url string) bool {
+	return url == "/manifest.json" || url == "/serviceworker.js"
+}
+
+func handleSignIn(ctx *macaron.Context, sess session.Store, user *models.User) {
+	_ = sess.Delete("openid_verified_uri")
+	_ = sess.Delete("openid_signin_remember")
+	_ = sess.Delete("openid_determined_email")
+	_ = sess.Delete("openid_determined_username")
+	_ = sess.Delete("twofaUid")
+	_ = sess.Delete("twofaRemember")
+	_ = sess.Delete("u2fChallenge")
+	_ = sess.Delete("linkAccount")
+	err := sess.Set("uid", user.ID)
+	if err != nil {
+		log.Error(fmt.Sprintf("Error setting session: %v", err))
+	}
+	err = sess.Set("uname", user.Name)
+	if err != nil {
+		log.Error(fmt.Sprintf("Error setting session: %v", err))
+	}
+
+	// Language setting of the user overwrites the one previously set
+	// If the user does not have a locale set, we save the current one.
+	if len(user.Language) == 0 {
+		user.Language = ctx.Locale.Language()
+		if err := models.UpdateUserCols(user, "language"); err != nil {
+			log.Error(fmt.Sprintf("Error updating user language [user: %d, locale: %s]", user.ID, user.Language))
+			return
+		}
+	}
+
+	ctx.SetCookie("lang", user.Language, nil, setting.AppSubURL, setting.SessionConfig.Domain, setting.SessionConfig.Secure, true)
+
+	// Clear whatever CSRF has right now, force to generate a new one
+	ctx.SetCookie(setting.CSRFCookieName, "", -1, setting.AppSubURL, setting.SessionConfig.Domain, setting.SessionConfig.Secure, true)
 }
